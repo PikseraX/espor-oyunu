@@ -1,6 +1,6 @@
 // Kritik Seçim Espor - çevrimdışı çalışma (service worker)
 // Önce internetten yeni dosyayı dener, internet yoksa kayıtlı kopyayı açar.
-const ONBELLEK = "kritik-secim-v1";
+const ONBELLEK = "kritik-secim-v2";
 const DOSYALAR = [
   "./",
   "./index.html",
@@ -31,10 +31,15 @@ self.addEventListener("activate", function (e) {
 
 self.addEventListener("fetch", function (e) {
   if (e.request.method !== "GET") return;
+  try {
+    if (new URL(e.request.url).origin !== self.location.origin) return;
+  } catch (_) { return; }
   e.respondWith(
     fetch(e.request).then(function (yanit) {
-      const kopya = yanit.clone();
-      caches.open(ONBELLEK).then(function (c) { c.put(e.request, kopya); });
+      if (yanit && yanit.status === 200 && yanit.type === "basic") {
+        const kopya = yanit.clone();
+        caches.open(ONBELLEK).then(function (c) { c.put(e.request, kopya); });
+      }
       return yanit;
     }).catch(function () {
       return caches.match(e.request).then(function (k) {

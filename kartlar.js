@@ -10,7 +10,7 @@ const kartlar = [
     B:{ yazi:"Reddet", sonuc:"Oyuncu kalıyor. Takım senin arkanda.",
         etki:{ butce:-5, moral:+15, form:+5 } } },
 
-  { metin:"Ünlü bir yayıncı seni sponsor etmek istiyor ama antrenman saatleri kısalacak.",
+  { metin:"Ünlü bir yayıncı sana sponsor olmak istiyor ama antrenman saatleri kısalacak.",
     A:{ yazi:"Kabul et", sonuc:"Sponsorluk anlaşması imzalandı. Para var ama antrenman azaldı.",
         etki:{ butce:+15, taraftar:+10, form:-15 } },
     B:{ yazi:"Reddet", sonuc:"Antrenman programı korundu.",
@@ -142,11 +142,11 @@ const kartlar = [
     B:{ yazi:"Eskisiyle devam", sonuc:"Kopmalar sürdü, oyuncular sinirli.",
         etki:{ form:-10, moral:-5 } } },
 
-  { metin:"Ünlü bir yayıncı takımına şovmaç meydan okuması yolladı.",
+  { metin:"Ünlü bir yayıncı takımına şov maçı meydan okuması yolladı.",
     A:{ yazi:"Kabul et", risk:{ sans:0.5,
-        basari:{ metin:"Şovmaçı kazandınız! Sosyal medya patladı.",
+        basari:{ metin:"Şov maçını kazandınız! Sosyal medya patladı.",
                  etki:{ taraftar:+20, moral:+10 } },
-        basarisiz:{ metin:"Şovmaçı kaybettiniz. Dalga geçildi.",
+        basarisiz:{ metin:"Şov maçını kaybettiniz. Dalga geçildi.",
                     etki:{ taraftar:-15, moral:-10 } } } },
     B:{ yazi:"Reddet", sonuc:"Meydan okumayı geçtin. Sessiz bir hafta.",
         etki:{ taraftar:-5, moral:+5 } } },
@@ -248,7 +248,7 @@ const kartlar = [
     A:{ yazi:"Şans ver", sonuc:"Yedek oyuncu sahaya çıktı ve etkiledi.",
         etki:{ form:+10, moral:-10 } },
     B:{ yazi:"Beklet", sonuc:"Kadro dengesi korundu ama yedek oyuncu küstü.",
-        etki:{ moral:-10, form:+5 } } },
+        etki:{ moral:-5, form:+5 } } },
 
   { metin:"Ünlü bir rapçi takım için marş yapmak istiyor ama ücretli.",
     A:{ yazi:"Anlaş", sonuc:"Marş çok tutuldu, stadyum inliyor!",
@@ -281,10 +281,10 @@ const kartlar = [
         etki:{ butce:+5, form:-5 } } },
 
   { metin:"Basında takım hakkında asılsız transfer dedikodusu çıktı.",
-    A:{ yazi:"Yalanla", sonuc:"Açıklama yaptın, durum kontrol altında.",
-        etki:{ taraftar:+5, moral:+5 } },
-    B:{ yazi:"Sessiz kal", sonuc:"Dedikodu büyüdü, oyuncular rahatsız.",
-        etki:{ taraftar:-10, moral:-10 } } },
+    A:{ yazi:"Yalanla", sonuc:"Resmi PR açıklaması yaptın, durum kontrol altında.",
+        etki:{ butce:-5, taraftar:+5, moral:+5 } },
+    B:{ yazi:"Sessiz kal", sonuc:"Masraf etmedin ama dedikodu büyüdü.",
+        etki:{ butce:+5, taraftar:-10, moral:-10 } } },
 
   { metin:"Oyuncu maaş zammı istiyor. Bütçe zaten sıkışık.",
     A:{ yazi:"Zam ver", sonuc:"Oyuncu mutlu ama kasa küçüldü.",
@@ -341,10 +341,10 @@ const kartlar = [
         etki:{ moral:+5, taraftar:-5 } } },
 
   { metin:"Altyapıdan bir genç inanılmaz bir performans sergiledi.",
-    A:{ yazi:"A takıma al", sonuc:"Genç oyuncu şoke etti. Rakipler hazırlıksızdı.",
-        etki:{ form:+15, moral:+5, taraftar:+5 } },
-    B:{ yazi:"Bekle", sonuc:"Sabırlı davrandın. Genç daha fazla gelişti.",
-        etki:{ moral:+5, butce:-5 } } },
+    A:{ yazi:"A takıma al", sonuc:"Genç oyuncu şoke etti ama ilk beşten biri yedek kaldı.",
+        etki:{ form:+15, taraftar:+5, moral:-5 } },
+    B:{ yazi:"Bekle", sonuc:"Sabırlı davrandın. Kadro uyumu korundu, maaş artmadı.",
+        etki:{ moral:+5, butce:+5, form:-5 } } },
 
   { metin:"Antrenman odasında klima bozuldu. Oyuncular sıcaktan bunalıyor.",
     A:{ yazi:"Hemen tamir ettir", sonuc:"Klima tamir edildi. Oyuncular rahat nefes aldı.",
@@ -598,10 +598,10 @@ const kartlar = [
                     etki:{ butce:-25, taraftar:-5 } } } } },
 
   { metin:"Büyük bir mağaza zinciri takım ürünlerini satmak istiyor.",
-    A:{ yazi:"Anlaş", sonuc:"Ürünler çok satıldı, gelir arttı.",
-        etki:{ butce:+15, taraftar:+5 } },
-    B:{ yazi:"Reddet", sonuc:"Marka bütünlüğün korundu ama para gelmedi.",
-        etki:{ butce:-5, taraftar:+5 } } },
+    A:{ yazi:"Anlaş", sonuc:"Ürünler çok satıldı ama kalite düştüğü için tepki geldi.",
+        etki:{ butce:+15, taraftar:-5 } },
+    B:{ yazi:"Reddet", sonuc:"Özel seri korundu, taraftar memnun ama gelir kaçtı.",
+        etki:{ butce:-5, taraftar:+10 } } },
 
   { metin:"Oyuncuların yarısı sabah, yarısı gece antrenmanı istiyor.",
     A:{ yazi:"Sabah", sonuc:"Düzen oturdu ama gececiler uykusuz kaldı.",
@@ -610,7 +610,7 @@ const kartlar = [
         etki:{ form:-5, moral:+10 } } },
 
   { metin:"Yıldız oyuncuna yurtdışından büyük bir teklif geldi.",
-    A:{ yazi:"Bırak git", sonuc:"Kasa doldu ama takım yıldızsız kaldı.",
+    A:{ yazi:"Bırak gitsin", sonuc:"Kasa doldu ama takım yıldızsız kaldı.",
         etki:{ butce:+25, form:-20, moral:-10 } },
     B:{ yazi:"Zam ver", sonuc:"Oyuncu kaldı. Kasa hafifledi.",
         etki:{ butce:-20, moral:+10, form:+5 } } },

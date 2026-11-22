@@ -2,16 +2,19 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-title" content="Kritik Seçim">
 <meta name="theme-color" content="#0d0f1a">
- <link rel="apple-touch-icon" href="ikon.png">
- <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="ikon.png">
+<link rel="manifest" href="manifest.json">
 <title>Kritik Seçim Espor</title>
 <style>
-  * { -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { background:#0d0f1a; color:#e8eaf6; font-family:Arial,sans-serif;
-         margin:0; display:flex; justify-content:center; padding:20px; min-height:100vh; }
+         margin:0; display:flex; justify-content:center;
+         padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+         min-height:100vh; min-height:100dvh; }
 
   /* Arka plan ışık hâleleri */
   body::before { content:""; position:fixed; top:0; left:0; right:0; bottom:0; z-index:-1;
@@ -31,11 +34,6 @@
 
   .ekran { display:none; }
   .ekran.aktif { display:block; animation: ekranGiris .35s ease-out; }
-
-  /* Ana menü resmi */
-  .logo { display:block; margin:0 auto 20px; width:130px; height:130px;
-          border-radius:29px; box-shadow:0 0 28px rgba(124,77,255,.55), 0 0 60px rgba(0,229,255,.18);
-          animation: logoParla 4s ease-in-out infinite; }
 
   /* Göstergeler */
   .stats { display:flex; gap:8px; margin-bottom:20px; }
@@ -140,8 +138,6 @@
   @keyframes nabiz { 0%,100% { opacity:1; } 50% { opacity:.45; } }
   @keyframes baslikParla { 0%,100% { filter:drop-shadow(0 0 6px rgba(124,77,255,.5)); }
                            50% { filter:drop-shadow(0 0 14px rgba(0,229,255,.6)); } }
-  @keyframes logoParla { 0%,100% { box-shadow:0 0 22px rgba(124,77,255,.5), 0 0 50px rgba(0,229,255,.12); }
-                         50% { box-shadow:0 0 34px rgba(124,77,255,.7), 0 0 70px rgba(0,229,255,.28); } }
   @keyframes arkaPlan { 0%,100% { opacity:.75; } 50% { opacity:1; } }
 
   /* Hareketi azalt ayarı açıksa animasyonları kapat */
@@ -242,90 +238,12 @@
 
   // ---------- OYUN DEĞİŞKENLERİ ----------
   let stats, hafta, mod, kart, kartIndex, deste, sonKart, asama;
+  let tehlikeTimer = null;
+  let kilitliUntil = 0;
   // asama: "soru" (kart gösteriliyor), "sonuc" (sonuç gösteriliyor), "bitti" (oyun bitti)
 
-  // ---------- İKON / LOGO ÇİZİMİ ----------
-  // Resim dosyası yok: logo, tarayıcıda çizilir. Aynı çizim hem ana menüde
-  // hem de ana ekran (uygulama) ikonunda kullanılır.
-  function ikonCiz(c) {
-    const x = c.getContext("2d");
-    const s = c.width;
-
-    // Koyu zemin (tam dolu kare: iPhone köşeleri kendisi yuvarlar)
-    x.fillStyle = "#0d0f1a";
-    x.fillRect(0, 0, s, s);
-
-    // Mor ve mavi ışık hâleleri
-    let g = x.createRadialGradient(s * 0.2, s * 0.15, 0, s * 0.2, s * 0.15, s * 0.75);
-    g.addColorStop(0, "rgba(124,77,255,0.60)");
-    g.addColorStop(1, "rgba(124,77,255,0)");
-    x.fillStyle = g;
-    x.fillRect(0, 0, s, s);
-
-    g = x.createRadialGradient(s * 0.85, s * 0.9, 0, s * 0.85, s * 0.9, s * 0.7);
-    g.addColorStop(0, "rgba(0,229,255,0.45)");
-    g.addColorStop(1, "rgba(0,229,255,0)");
-    x.fillStyle = g;
-    x.fillRect(0, 0, s, s);
-
-    // Neon altıgen
-    const cx = s / 2, cy = s * 0.46, r = s * 0.32;
-    x.beginPath();
-    for (let i = 0; i < 6; i++) {
-      const a = (-90 + i * 60) * Math.PI / 180;
-      const px = cx + r * Math.cos(a);
-      const py = cy + r * Math.sin(a);
-      if (i === 0) x.moveTo(px, py); else x.lineTo(px, py);
-    }
-    x.closePath();
-    x.fillStyle = "rgba(20,24,48,0.85)";
-    x.fill();
-
-    const kenar = x.createLinearGradient(0, 0, s, s);
-    kenar.addColorStop(0, "#7c4dff");
-    kenar.addColorStop(1, "#00e5ff");
-    x.lineWidth = s * 0.028;
-    x.lineJoin = "round";
-    x.strokeStyle = kenar;
-    x.shadowColor = "#7c4dff";
-    x.shadowBlur = s * 0.05;
-    x.stroke();
-
-    // KS harfleri
-    x.shadowBlur = s * 0.035;
-    x.shadowColor = "#00e5ff";
-    const yazi = x.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
-    yazi.addColorStop(0, "#9e7bff");
-    yazi.addColorStop(1, "#00e5ff");
-    x.fillStyle = yazi;
-    x.font = "bold " + Math.round(s * 0.30) + "px Arial, Helvetica, sans-serif";
-    x.textAlign = "center";
-    x.textBaseline = "middle";
-    x.fillText("KS", cx, cy + s * 0.01);
-
-    // E S P O R yazısı
-    x.shadowBlur = 0;
-    x.fillStyle = "#e8eaf6";
-    x.font = "bold " + Math.round(s * 0.085) + "px Arial, Helvetica, sans-serif";
-    x.fillText("E S P O R", cx, s * 0.885);
-  }
-
-  // Tarayıcı sekmesi ve iPhone "Ana Ekrana Ekle" için ikonu hazırla
-  function ikonuHazirla() {
-    try {
-      const c = document.createElement("canvas");
-      c.width = 512;
-      c.height = 512;
-      ikonCiz(c);
-      const url = c.toDataURL("image/png");
-      ["apple-touch-icon", "icon"].forEach(function (rel) {
-        const l = document.createElement("link");
-        l.rel = rel;
-        if (rel === "icon") l.type = "image/png";
-        l.href = url;
-        document.head.appendChild(l);
-      });
-    } catch (e) {}
+  function tehlikeSesiniIptalEt() {
+    if (tehlikeTimer) { clearTimeout(tehlikeTimer); tehlikeTimer = null; }
   }
 
   // ---------- SES SİSTEMİ ----------
@@ -420,6 +338,14 @@
   document.addEventListener("click", function (e) {
     if (e.target.closest && e.target.closest("button")) sesCal("tikla");
   });
+  document.addEventListener("visibilitychange", function () {
+    if (!ac) return;
+    if (document.hidden && ac.state === "running") {
+      ac.suspend().catch(function () {});
+    } else if (!document.hidden && ac.state === "suspended" && sesAcik) {
+      ac.resume().catch(function () {});
+    }
+  });
 
   // ---------- EFEKTLER ----------
   // Karta bir animasyon sınıfı verir (öncekileri temizleyip yeniden başlatır)
@@ -464,8 +390,11 @@
       const v = localStorage.getItem(KAYIT_ANAHTARI);
       if (!v) return null;
       const k = JSON.parse(v);
-      if (!k || !MODLAR[k.mod] || !k.stats || typeof k.hafta !== "number") return null;
-      if (typeof k.kartIndex !== "number" || k.kartIndex < 0 || k.kartIndex >= kartlar.length) return null;
+      if (!k || !MODLAR[k.mod] || !k.stats || !Number.isInteger(k.hafta) || k.hafta < 1) return null;
+      for (const s of ["butce", "form", "taraftar", "moral"]) {
+        if (typeof k.stats[s] !== "number" || !Number.isFinite(k.stats[s]) || k.stats[s] < 0 || k.stats[s] > 100) return null;
+      }
+      if (!Number.isInteger(k.kartIndex) || k.kartIndex < 0 || k.kartIndex >= kartlar.length) return null;
       return k;
     } catch (e) { return null; }
   }
@@ -519,6 +448,7 @@
   }
 
   function menuyeDon() {
+    tehlikeSesiniIptalEt();
     menuyuGuncelle();
     ekranGoster("ekranMenu");
   }
@@ -567,6 +497,7 @@
     kartIndex = index;
     kart = kartlar[index];
     asama = "soru";
+    kilitliUntil = Date.now() + 280;
     document.getElementById("kart").innerHTML =
       (uyari ? '<div class="uyari">' + uyari + "</div>" : "") + kart.metin;
     efekt("giris");
@@ -587,6 +518,7 @@
     let html = "";
     for (const ad in etki) {
       const d = etki[ad];
+      if (d === 0) continue;
       const sinif = d > 0 ? "art" : "azal";
       const isaret = d > 0 ? "+" : "";
       html += '<span class="' + sinif + '">' + isimler[ad] + " " + isaret + d + "</span><br>";
@@ -637,8 +569,9 @@
     for (const ad in stats) {
       if (stats[ad] <= 20 && onceki[ad] > 20) yeniTehlike = true;
     }
+    tehlikeSesiniIptalEt();
     if (yeniTehlike) {
-      setTimeout(function () { sesCal("tehlike"); }, riskli ? 650 : 150);
+      tehlikeTimer = setTimeout(function () { tehlikeTimer = null; sesCal("tehlike"); }, riskli ? 650 : 150);
     }
 
     document.getElementById("kart").innerHTML =
@@ -649,51 +582,56 @@
     document.getElementById("btnA").textContent = "Devam";
     document.getElementById("btnB").style.display = "none";
     asama = "sonuc";
+    kilitliUntil = Date.now() + 280;
     kaydet();
   }
 
   function devam() {
-    // Sadece bir gösterge 0'a düştüyse oyun biter
+    tehlikeSesiniIptalEt();
+    // Bir veya daha fazla gösterge 0'a düştüyse oyun biter
+    const tukenenler = [];
     for (const ad in stats) {
-      if (stats[ad] <= 0) {
-        asama = "bitti";
-        kayitSil();
+      if (stats[ad] <= 0) tukenenler.push(isimler[ad]);
+    }
+    if (tukenenler.length > 0) {
+      asama = "bitti";
+      kilitliUntil = Date.now() + 280;
+      kayitSil();
 
-        // Rekor kontrolü
-        const rekorlar = rekorlariOku();
-        const eskiRekor = rekorlar[mod];
-        let rekorHtml;
-        if (hafta > eskiRekor) {
-          rekorlar[mod] = hafta;
-          rekorlariKaydet(rekorlar);
-          rekorHtml = '<div class="yeniRekor">🏆 YENİ REKOR!</div>';
-          sesCal("rekor");
-        } else {
-          rekorHtml = '<div class="rekorBilgi">🏆 ' + MODLAR[mod].ad + " rekorun: " + eskiRekor + " hafta</div>";
-          sesCal("bitti");
-        }
-
-        document.getElementById("kart").innerHTML =
-          "<b>OYUN BİTTİ</b><br><br>" + isimler[ad] + " tükendi.<br>" +
-          hafta + " hafta dayandın. Mod: " + MODLAR[mod].ad +
-          " · Seviye: " + seviyeHesapla(hafta) + rekorHtml;
-        efekt("efektBitti");
-        document.getElementById("btnA").textContent = "Yeniden Başla";
-        document.getElementById("btnB").textContent = "Ana Menü";
-        document.getElementById("btnB").style.display = "";
-        return;
+      // Rekor kontrolü
+      const rekorlar = rekorlariOku();
+      const eskiRekor = rekorlar[mod];
+      let rekorHtml;
+      if (hafta > eskiRekor) {
+        rekorlar[mod] = hafta;
+        rekorlariKaydet(rekorlar);
+        rekorHtml = '<div class="yeniRekor">🏆 YENİ REKOR!</div>';
+        sesCal("rekor");
+      } else {
+        rekorHtml = '<div class="rekorBilgi">🏆 ' + MODLAR[mod].ad + " rekorun: " + eskiRekor + " hafta</div>";
+        sesCal("bitti");
       }
+
+      document.getElementById("kart").innerHTML =
+        "<b>OYUN BİTTİ</b><br><br>" + tukenenler.join(" ve ") + " tükendi.<br>" +
+        hafta + " hafta dayandın. Mod: " + MODLAR[mod].ad +
+        " · Seviye: " + seviyeHesapla(hafta) + rekorHtml;
+      efekt("efektBitti");
+      document.getElementById("btnA").textContent = "Yeniden Başla";
+      document.getElementById("btnB").textContent = "Ana Menü";
+      document.getElementById("btnB").style.display = "";
+      return;
     }
     const eskiSeviye = seviyeHesapla(hafta);
     const eskiCarpan = carpanHesapla(hafta);
     hafta++;
     const yeniSeviye = seviyeHesapla(hafta);
+    const yeniCarpan = carpanHesapla(hafta);
     let uyari = "";
-    if (yeniSeviye > eskiSeviye) {
-      const yuzde = Math.round((carpanHesapla(hafta) / eskiCarpan - 1) * 100);
-      uyari = yuzde > 0
-        ? "⚠️ SEVİYE " + yeniSeviye + ": Olumsuz etkiler %" + yuzde + " arttı!"
-        : "⚠️ SEVİYE " + yeniSeviye + ": Zorluk en üst sınırda!";
+    if (yeniSeviye > eskiSeviye && yeniCarpan > eskiCarpan) {
+      const yuzde = Math.round((yeniCarpan / eskiCarpan - 1) * 100);
+      const tavanNotu = yeniCarpan >= MODLAR[mod].max ? " (En üst sınır!)" : "";
+      uyari = "⚠️ SEVİYE " + yeniSeviye + ": Olumsuz etkiler %" + yuzde + " arttı!" + tavanNotu;
       sesCal("seviye");
     }
     ekraniGuncelle();
@@ -716,11 +654,18 @@
   function devamEt() {
     const k = kayitOku();
     if (!k) return;
-    stats = k.stats;
+    stats = {
+      butce: sinirla(k.stats.butce),
+      form: sinirla(k.stats.form),
+      taraftar: sinirla(k.stats.taraftar),
+      moral: sinirla(k.stats.moral)
+    };
     hafta = k.hafta;
     mod = k.mod;
-    sonKart = k.sonKart;
-    deste = (k.deste || []).filter(function (i) { return i >= 0 && i < kartlar.length; });
+    sonKart = Number.isInteger(k.sonKart) ? k.sonKart : -1;
+    deste = (Array.isArray(k.deste) ? k.deste : []).filter(function (i) {
+      return Number.isInteger(i) && i >= 0 && i < kartlar.length;
+    });
     ekranGoster("ekranOyun");
     ekraniGuncelle();
     if (k.asama === "sonuc") {
@@ -733,8 +678,13 @@
   // ---------- GERİ BİLDİRİM ----------
   function geriBildirimGonder() {
     const metin = document.getElementById("geriBildirimMetin").value.trim();
+    if (!metin) {
+      alert("Lütfen göndermeden önce mesajını yaz.");
+      document.getElementById("geriBildirimMetin").focus();
+      return;
+    }
     const konu = "Kritik Seçim Espor - Geri Bildirim";
-    const govde = (metin || "") + "\n\n(Oyun: Kritik Seçim Espor)";
+    const govde = metin + "\n\n(Oyun: Kritik Seçim Espor)";
     window.location.href = "mailto:" + EPOSTA +
       "?subject=" + encodeURIComponent(konu) +
       "&body=" + encodeURIComponent(govde);
@@ -762,11 +712,13 @@
   document.getElementById("btnMenu").onclick = menuyeDon;
 
   document.getElementById("btnA").onclick = function () {
+    if (Date.now() < kilitliUntil) return;
     if (asama === "soru") sec("A");
     else if (asama === "sonuc") devam();
     else yeniOyunBaslat(mod);       // oyun bitti: aynı modda yeniden başla
   };
   document.getElementById("btnB").onclick = function () {
+    if (Date.now() < kilitliUntil) return;
     if (asama === "soru") sec("B");
     else if (asama === "bitti") menuyeDon();
   };
